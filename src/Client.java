@@ -26,6 +26,6 @@ public class Client
 //        }
     	
 //        Client client=new Client( Integer.parseInt(args[0]));
-    	Client client=new Client(3000);
+    	Client client=new Client(3004);
      } 
 }
