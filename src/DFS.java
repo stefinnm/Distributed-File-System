@@ -5,6 +5,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.math.BigInteger;
 import java.security.*;
+
 // import a json package
 
 
@@ -79,7 +80,7 @@ public class DFS
         Files.createDirectories(Paths.get(guid+"/repository"));
     }
     
-    public  void join(String Ip, int port) throws Exception
+    public void join(String Ip, int port) throws Exception
     {
         chord.joinRing(Ip, port);
         chord.Print();
@@ -113,8 +114,13 @@ public class DFS
     public String ls() throws Exception
     {
         String listOfFiles = "";
+        long guid = md5("Metadata");
+        ChordMessageInterface peer = chord.locateSuccessor(guid);
+        InputStream metadataraw = peer.get(guid);
+        
        // TODO: returns all the files in the Metadata
-       // JsonParser jp = readMetaData();
+     
+        JsonParser jp = readMetaData();
         return listOfFiles;
     }
 
