@@ -19,6 +19,7 @@ public class Client
     
     static public void main(String args[]) throws Exception
     {
+    	
         if (args.length < 1 ) {
             throw new IllegalArgumentException("Parameter: <port>");
         }
