@@ -12,7 +12,8 @@ public class Client
     DFS dfs;
     public Client(int p) throws Exception {
         dfs = new DFS(p);
-        
+        dfs.join(InetAddress.getLocalHost().toString(), p);
+        System.out.println(dfs.ls());
             // User interface:
             // join, ls, touch, delete, read, tail, head, append, move
     }
@@ -20,10 +21,11 @@ public class Client
     static public void main(String args[]) throws Exception
     {
     	
-        if (args.length < 1 ) {
-            throw new IllegalArgumentException("Parameter: <port>");
-        }
-        Client client=new Client( Integer.parseInt(args[0]));
-        
+//        if (args.length < 1 ) {
+//            throw new IllegalArgumentException("Parameter: <port>");
+//        }
+    	
+//        Client client=new Client( Integer.parseInt(args[0]));
+    	Client client=new Client(3004);
      } 
 }

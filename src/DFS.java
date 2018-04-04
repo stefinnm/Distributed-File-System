@@ -5,6 +5,9 @@ import java.io.*;
 import java.nio.file.*;
 import java.math.BigInteger;
 import java.security.*;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 // import a json package
 
 
@@ -79,30 +82,32 @@ public class DFS
         Files.createDirectories(Paths.get(guid+"/repository"));
     }
     
-    public  void join(String Ip, int port) throws Exception
+    public void join(String Ip, int port) throws Exception
     {
         chord.joinRing(Ip, port);
         chord.Print();
     }
     
-  /*  public JSonParser readMetaData() throws Exception
+    public JsonReader readMetaData() throws Exception
     {
-        JsonParser jsonParser _ null;
+        //Gson jsonParser = null;
         long guid = md5("Metadata");
+        System.out.println(guid);
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         InputStream metadataraw = peer.get(guid);
         // jsonParser = Json.createParser(metadataraw);
-        return jsonParser;
+        JsonReader reader = new JsonReader(new InputStreamReader(metadataraw, "UTF-8"));
+        return reader;
     }
     
     public void writeMetaData(InputStream stream) throws Exception
     {
-        JsonParser jsonParser _ null;
+        //JsonParser jsonParser _ null;
         long guid = md5("Metadata");
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         peer.put(guid, stream);
     }
-   */
+   
     public void mv(String oldName, String newName) throws Exception
     {
         // TODO:  Change the name in Metadata
@@ -114,7 +119,26 @@ public class DFS
     {
         String listOfFiles = "";
        // TODO: returns all the files in the Metadata
-       // JsonParser jp = readMetaData();
+     
+        JsonReader jr = readMetaData();
+        
+        jr.beginObject();
+        jr.skipValue();
+        jr.beginArray();
+        while (jr.hasNext()) {
+            jr.beginObject();
+            while (jr.hasNext()) {
+                String name = jr.nextName();
+                if (name.equals("name")) {
+                    listOfFiles += jr.nextString()+"\n";
+                } else {
+                    jr.skipValue();
+                }
+            }
+            jr.endObject();
+        }
+        jr.endArray();
+        jr.endObject();
         return listOfFiles;
     }
 
