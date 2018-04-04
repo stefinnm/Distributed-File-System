@@ -18,6 +18,7 @@ public class Chord extends java.rmi.server.UnicastRemoteObject implements ChordM
     long guid;   		// GUID (i)
     
     
+    
     public Boolean isKeyInSemiCloseInterval(long key, long key1, long key2)
     {
        if (key1 < key2)
