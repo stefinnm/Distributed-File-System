@@ -80,6 +80,15 @@ public class DFS
         long guid = md5("" + port);
         chord = new Chord(port, guid);
         Files.createDirectories(Paths.get(guid+"/repository"));
+        
+        File file = new File(guid+"/repository/"+md5("Metadata"));
+        
+        if(!file.exists()){
+            PrintWriter pr = new PrintWriter(file);
+            pr.print("{\"metadata\":[]}");
+            pr.close();
+            file.createNewFile();
+        }
     }
     
     public void join(String Ip, int port) throws Exception
@@ -117,6 +126,7 @@ public class DFS
     
     public String ls() throws Exception
     {
+        System.out.println("Performing ls");
         String listOfFiles = "";
        // TODO: returns all the files in the Metadata
      
