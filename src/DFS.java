@@ -5,7 +5,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.math.BigInteger;
 import java.security.*;
-
+import com.google.gson.*;
 // import a json package
 
 
@@ -86,16 +86,17 @@ public class DFS
         chord.Print();
     }
     
-  /*  public JSonParser readMetaData() throws Exception
+    public Gson readMetaData() throws Exception
     {
-        JsonParser jsonParser _ null;
+        Gson jsonParser = null;
         long guid = md5("Metadata");
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         InputStream metadataraw = peer.get(guid);
-        // jsonParser = Json.createParser(metadataraw);
+        //jsonParser = Json.createParser(metadataraw);
+        jsonParser.toJson(metadataraw);
         return jsonParser;
     }
-    
+/*    
     public void writeMetaData(InputStream stream) throws Exception
     {
         JsonParser jsonParser _ null;
@@ -114,13 +115,9 @@ public class DFS
     public String ls() throws Exception
     {
         String listOfFiles = "";
-        long guid = md5("Metadata");
-        ChordMessageInterface peer = chord.locateSuccessor(guid);
-        InputStream metadataraw = peer.get(guid);
-        
        // TODO: returns all the files in the Metadata
      
-        JsonParser jp = readMetaData();
+        Gson jp = readMetaData();
         return listOfFiles;
     }
 
