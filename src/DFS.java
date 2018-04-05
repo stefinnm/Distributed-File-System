@@ -13,7 +13,7 @@ import com.google.gson.stream.JsonWriter;
 
 /* JSON Format
 
- {
+{
     "metadata" :
     {
         file :
@@ -101,7 +101,6 @@ public class DFS
     {
         //Gson jsonParser = null;
         long guid = md5("Metadata");
-        System.out.println(guid);
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         InputStream metadataraw = peer.get(guid);
         // jsonParser = Json.createParser(metadataraw);
@@ -121,6 +120,37 @@ public class DFS
     {
         // TODO:  Change the name in Metadata
         // Write Metadata
+       
+        JsonParser jp = new JsonParser();
+        JsonReader jr = readMetaData();
+        JsonObject metaData = (JsonObject)jp.parse(jr);
+        JsonArray ja = metaData.getAsJsonArray("metadata");
+        
+        
+        
+        for(int i = 0; i < ja.size(); i++){
+            JsonObject jo = ja.get(i).getAsJsonObject();
+            String name = jo.get("name").getAsString();
+            if (name.equals(oldName)) {
+                jo.addProperty("name", newName);
+                JsonArray pageArray = jo.get("page").getAsJsonArray();
+                
+                for (int j=0;j<pageArray.size();j++) {
+                    JsonObject page = pageArray.get(j).getAsJsonObject();
+                    long guid = md5(newName+(j+1));
+                    
+                    page.addProperty("guid",guid);
+ 
+                    byte[] content = read(oldName,j+1);
+                    ChordMessageInterface peer = chord.locateSuccessor(guid);
+                    InputStream is = new FileStream(content);
+                    peer.put(guid, is);                
+                }
+            }
+        }
+        String s = metaData.toString();
+        InputStream input = new FileStream(s.getBytes());
+        writeMetaData(input);
     }
 
     
@@ -206,7 +236,6 @@ public class DFS
                 is.close();
             }
         }
-        
         return result;
     }
     

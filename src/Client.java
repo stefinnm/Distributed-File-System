@@ -13,7 +13,17 @@ public class Client
     public Client(int p) throws Exception {
         dfs = new DFS(p);
         dfs.join(InetAddress.getLocalHost().toString(), p);
+        //Results of ls
         System.out.println(dfs.ls());
+        
+        
+        Scanner in = new Scanner(System.in);
+        System.out.print("Enter file to rename: ");
+        String oldName = in.nextLine();
+        dfs.mv(oldName, "TestNewName");
+        
+        
+        
             // User interface:
             // join, ls, touch, delete, read, tail, head, append, move
     }
@@ -26,6 +36,6 @@ public class Client
 //        }
     	
 //        Client client=new Client( Integer.parseInt(args[0]));
-    	Client client=new Client(3004);
+    	Client client=new Client(3003);
      } 
 }
