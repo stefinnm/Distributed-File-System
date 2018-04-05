@@ -22,7 +22,10 @@ public class Client
         String oldName = in.nextLine();
         dfs.mv(oldName, "TestNewName");
         
+        String newFile = in.nextLine();
+        dfs.touch(newFile);
         
+        System.out.println(dfs.ls());
         
             // User interface:
             // join, ls, touch, delete, read, tail, head, append, move

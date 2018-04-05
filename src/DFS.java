@@ -117,10 +117,7 @@ public class DFS
     }
    
     public void mv(String oldName, String newName) throws Exception
-    {
-        // TODO:  Change the name in Metadata
-        // Write Metadata
-       
+    {  
         JsonParser jp = new JsonParser();
         JsonReader jr = readMetaData();
         JsonObject metaData = (JsonObject)jp.parse(jr);
@@ -158,7 +155,6 @@ public class DFS
     {
         System.out.println("Performing ls");
         String listOfFiles = "";
-       // TODO: returns all the files in the Metadata
      
         JsonReader jr = readMetaData();
         
@@ -187,8 +183,23 @@ public class DFS
     {
          // TODO: Create the file fileName by adding a new entry to the Metadata
         // Write Metadata
-
+        JsonParser jp = new JsonParser();
+        JsonReader jr = readMetaData();
+        JsonObject metaData = (JsonObject)jp.parse(jr);
+        JsonArray ja = metaData.getAsJsonArray("metadata");
         
+        JsonObject fileObj = new JsonObject();
+        fileObj.addProperty("name",fileName);
+        fileObj.addProperty("numberOfPages", 0);
+        fileObj.addProperty("pageSize", 1024);
+        fileObj.addProperty("size", 0);
+        fileObj.add("pages", new JsonArray());
+
+        ja.add(fileObj);
+        
+        String s = metaData.toString();
+        InputStream input = new FileStream(s.getBytes());
+        writeMetaData(input);
         
     }
     public void delete(String fileName) throws Exception
@@ -242,12 +253,10 @@ public class DFS
     
     public byte[] tail(String fileName) throws Exception
     {
-        // TODO: return the last page of the fileName
         return read(fileName, -1);
     }
     public byte[] head(String fileName) throws Exception
     {
-        // TODO: return the first page of the fileName
         return read(fileName, 1);
     }
     public void append(String filename, Byte[] data) throws Exception
