@@ -193,7 +193,7 @@ public class DFS
         fileObj.addProperty("numberOfPages", 0);
         fileObj.addProperty("pageSize", 1024);
         fileObj.addProperty("size", 0);
-        fileObj.add("pages", new JsonArray());
+        fileObj.add("page", new JsonArray());
 
         ja.add(fileObj);
         
@@ -210,7 +210,36 @@ public class DFS
         //     peer.delete(page.guid)
         // delete Metadata.filename
         // Write Metadata
-
+        
+        JsonParser jp = new JsonParser();
+        JsonReader jr = readMetaData();
+        JsonObject metaData = (JsonObject)jp.parse(jr);
+        JsonArray ja = metaData.getAsJsonArray("metadata");
+        
+        int rmIndex = -1;
+        
+        for(int i = 0; i < ja.size(); i++){
+            JsonObject jo = ja.get(i).getAsJsonObject();
+            String name = jo.get("name").getAsString();
+            
+            if(name.equals(fileName)){
+                JsonArray pages = jo.get("page").getAsJsonArray();
+                for(int j = 0; j < pages.size(); j++){
+                    JsonObject page = pages.get(j).getAsJsonObject();
+                    long guid = page.get("guid").getAsLong();
+                    
+                    ChordMessageInterface peer = chord.locateSuccessor(guid);
+                    peer.delete(guid);
+                }
+            }
+            rmIndex = i;
+        }
+        if (rmIndex > -1) {
+            ja.remove(rmIndex);
+            String s = metaData.toString();
+            InputStream input = new FileStream(s.getBytes());
+            writeMetaData(input);
+        }
         
     }
     

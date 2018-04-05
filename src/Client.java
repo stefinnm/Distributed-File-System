@@ -21,10 +21,16 @@ public class Client
         System.out.print("Enter file to rename: ");
         String oldName = in.nextLine();
         dfs.mv(oldName, "TestNewName");
+        System.out.println(dfs.ls());
         
+        System.out.print("Enter file to add: ");
         String newFile = in.nextLine();
         dfs.touch(newFile);
+        System.out.println(dfs.ls());
         
+        System.out.print("Enter file to delete: ");
+        String deleteFile = in.nextLine();
+        dfs.delete(deleteFile);
         System.out.println(dfs.ls());
         
             // User interface:
