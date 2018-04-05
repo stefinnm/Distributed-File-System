@@ -5,6 +5,9 @@ import java.io.*;
 import java.nio.file.*;
 import java.math.BigInteger;
 import java.security.*;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 // import a json package
 
 
@@ -77,32 +80,43 @@ public class DFS
         long guid = md5("" + port);
         chord = new Chord(port, guid);
         Files.createDirectories(Paths.get(guid+"/repository"));
+        
+        File file = new File(guid+"/repository/"+md5("Metadata"));
+        
+        if(!file.exists()){
+            PrintWriter pr = new PrintWriter(file);
+            pr.print("{\"metadata\":[]}");
+            pr.close();
+            file.createNewFile();
+        }
     }
     
-    public  void join(String Ip, int port) throws Exception
+    public void join(String Ip, int port) throws Exception
     {
         chord.joinRing(Ip, port);
         chord.Print();
     }
     
-  /*  public JSonParser readMetaData() throws Exception
+    public JsonReader readMetaData() throws Exception
     {
-        JsonParser jsonParser _ null;
+        //Gson jsonParser = null;
         long guid = md5("Metadata");
+        System.out.println(guid);
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         InputStream metadataraw = peer.get(guid);
         // jsonParser = Json.createParser(metadataraw);
-        return jsonParser;
+        JsonReader reader = new JsonReader(new InputStreamReader(metadataraw, "UTF-8"));
+        return reader;
     }
     
     public void writeMetaData(InputStream stream) throws Exception
     {
-        JsonParser jsonParser _ null;
+        //JsonParser jsonParser _ null;
         long guid = md5("Metadata");
         ChordMessageInterface peer = chord.locateSuccessor(guid);
         peer.put(guid, stream);
     }
-   */
+   
     public void mv(String oldName, String newName) throws Exception
     {
         // TODO:  Change the name in Metadata
@@ -112,9 +126,29 @@ public class DFS
     
     public String ls() throws Exception
     {
+        System.out.println("Performing ls");
         String listOfFiles = "";
        // TODO: returns all the files in the Metadata
-       // JsonParser jp = readMetaData();
+     
+        JsonReader jr = readMetaData();
+        
+        jr.beginObject();
+        jr.skipValue();
+        jr.beginArray();
+        while (jr.hasNext()) {
+            jr.beginObject();
+            while (jr.hasNext()) {
+                String name = jr.nextName();
+                if (name.equals("name")) {
+                    listOfFiles += jr.nextString()+"\n";
+                } else {
+                    jr.skipValue();
+                }
+            }
+            jr.endObject();
+        }
+        jr.endArray();
+        jr.endObject();
         return listOfFiles;
     }
 
@@ -139,22 +173,53 @@ public class DFS
         
     }
     
-    public Byte[] read(String fileName, int pageNumber) throws Exception
+    public byte[] read(String fileName, int pageNumber) throws Exception
     {
         // TODO: read pageNumber from fileName
-        return null;
+        JsonParser jp = new JsonParser();
+        JsonArray ja = ((JsonObject) jp.parse(readMetaData())).getAsJsonArray("metadata");
+        
+        byte[] result = null;
+        
+        for(int i = 0; i < ja.size(); i++){
+            JsonObject jo = ja.get(i).getAsJsonObject();
+            if((jo.get("name").getAsString()).equals(fileName)){
+                JsonArray pageArray = jo.get("page").getAsJsonArray();
+                int index = 0;
+                if(pageNumber != -1)
+                    index = pageNumber-1;
+                else
+                    index = pageArray.size()-1;
+                
+                JsonObject page = pageArray.get(index).getAsJsonObject();
+                int size = page.get("size").getAsInt();
+                long pageGuid = page.get("guid").getAsLong();
+
+                ChordMessageInterface peer = chord.locateSuccessor(pageGuid);
+                InputStream is = peer.get(pageGuid);
+                result = new byte[size];
+
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead = is.read(result, 0, result.length);
+                buffer.write(result, 0, nRead);
+                buffer.flush();
+                is.close();
+            }
+        }
+        
+        return result;
     }
     
     
-    public Byte[] tail(String fileName) throws Exception
+    public byte[] tail(String fileName) throws Exception
     {
         // TODO: return the last page of the fileName
-        return null;
+        return read(fileName, -1);
     }
-    public Byte[] head(String fileName) throws Exception
+    public byte[] head(String fileName) throws Exception
     {
         // TODO: return the first page of the fileName
-        return null;
+        return read(fileName, 1);
     }
     public void append(String filename, Byte[] data) throws Exception
     {
