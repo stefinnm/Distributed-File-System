@@ -173,22 +173,53 @@ public class DFS
         
     }
     
-    public Byte[] read(String fileName, int pageNumber) throws Exception
+    public byte[] read(String fileName, int pageNumber) throws Exception
     {
         // TODO: read pageNumber from fileName
-        return null;
+        JsonParser jp = new JsonParser();
+        JsonArray ja = ((JsonObject) jp.parse(readMetaData())).getAsJsonArray("metadata");
+        
+        byte[] result = null;
+        
+        for(int i = 0; i < ja.size(); i++){
+            JsonObject jo = ja.get(i).getAsJsonObject();
+            if((jo.get("name").getAsString()).equals(fileName)){
+                JsonArray pageArray = jo.get("page").getAsJsonArray();
+                int index = 0;
+                if(pageNumber != -1)
+                    index = pageNumber-1;
+                else
+                    index = pageArray.size()-1;
+                
+                JsonObject page = pageArray.get(index).getAsJsonObject();
+                int size = page.get("size").getAsInt();
+                long pageGuid = page.get("guid").getAsLong();
+
+                ChordMessageInterface peer = chord.locateSuccessor(pageGuid);
+                InputStream is = peer.get(pageGuid);
+                result = new byte[size];
+
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead = is.read(result, 0, result.length);
+                buffer.write(result, 0, nRead);
+                buffer.flush();
+                is.close();
+            }
+        }
+        
+        return result;
     }
     
     
-    public Byte[] tail(String fileName) throws Exception
+    public byte[] tail(String fileName) throws Exception
     {
         // TODO: return the last page of the fileName
-        return null;
+        return read(fileName, -1);
     }
-    public Byte[] head(String fileName) throws Exception
+    public byte[] head(String fileName) throws Exception
     {
         // TODO: return the first page of the fileName
-        return null;
+        return read(fileName, 1);
     }
     public void append(String filename, Byte[] data) throws Exception
     {
